@@ -1,5 +1,15 @@
-import { Controller, Get, Render, Request, Response } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Render,
+  Request,
+  Response,
+} from '@nestjs/common';
 import { ToolsService } from '../../../service/tools/tools.service';
+import { AdminService } from '../../../service/admin/admin.service';
+
 import {
   ApiTags,
   ApiParam,
@@ -11,15 +21,26 @@ import {
 @ApiTags('登录')
 @Controller('admin/login')
 export class LoginController {
-  constructor(private toolsService: ToolsService) {}
+  constructor(
+    private toolsService: ToolsService,
+    private adminService: AdminService,
+  ) {}
 
   @Get()
-  @Render('admin/login')
+  // @Render('admin/login')
   index() {
     return {};
   }
 
-  @Get('code') // 123123123
+  @Post('doLogin')
+  async doLogin(@Body() body) {
+    console.log('loginFrom:', body);
+
+    console.log(await this.adminService.findAll());
+    return {};
+  }
+
+  @Get('code')
   @ApiOperation({
     summary: '登录code',
   })

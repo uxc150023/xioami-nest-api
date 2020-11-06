@@ -23,6 +23,9 @@ async function bootstrap() {
   // 最后一步是setup()。它依次接受（1）装入Swagger的路径，（2）应用程序实例, （3）描述Nest应用程序的文档。
   SwaggerModule.setup('/api', app, document);
 
+  // 处理跨域
+  app.enableCors();
+
   //配置静态资源目录
   app.useStaticAssets(path.join(__dirname, '..', 'public'));
   //配置模板引擎

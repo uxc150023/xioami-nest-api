@@ -10,8 +10,8 @@ export class ToolsService {
       size: 4,
       fontSize: 50,
       width: 100,
-      height: 40,
-      background: '#cc9966',
+      height: 50,
+      background: 'transparent',
     });
     return captcha;
   }
