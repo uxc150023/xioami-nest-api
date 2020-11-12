@@ -4,6 +4,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as path from 'path';
 import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
+import { TransformInterceptor } from './interceptor/transform.interceptor';
 
 // api文档插件
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -38,13 +40,18 @@ async function bootstrap() {
   //配置 session 的中间件
   app.use(
     session({
-      secret: 'keyboard cat',
-      resave: true,
-      saveUninitialized: true,
-      cookie: { maxAge: 1000 * 60 * 30, httpOnly: true },
+      secret: 'ssssssss',
+      resave: false,
+      saveUninitialized: false,
+      cookie: { path: '/', maxAge: 219000, httpOnly: true },
       rolling: true,
     }),
   );
+
+  // 注册过滤器
+  app.useGlobalFilters(new HttpExceptionFilter());
+  // 全局拦截器
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   await app.listen(3000);
 }

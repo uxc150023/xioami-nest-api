@@ -17,4 +17,14 @@ export class AdminService {
   async findAll() {
     return await this.adminRepository.find();
   }
+
+  async find(json: any) {
+    // return await this.adminRepository.query(
+    //   "SELECT * FROM `admin` WHERE username = 'zhoubin'",
+    // );
+    return await this.adminRepository.find({
+      username: json.username,
+      password: json.password,
+    });
+  }
 }
