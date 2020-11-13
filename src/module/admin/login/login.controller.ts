@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
   Render,
   Request,
@@ -17,6 +18,7 @@ import {
   ApiHeader,
   ApiOperation,
 } from '@nestjs/swagger';
+import * as jwt from 'jsonwebtoken';
 
 @ApiTags('登录')
 @Controller('admin/login')
@@ -27,7 +29,6 @@ export class LoginController {
   ) {}
 
   @Get()
-  // @Render('admin/login')
   index() {
     return {};
   }
@@ -38,7 +39,6 @@ export class LoginController {
   })
   async getCode(@Body() body, @Request() req, @Response() res) {
     var svgCaptcha = await this.toolsService.getCaptcha();
-    // req.session.code = svgCaptcha.text;
     this.toolsService.setRedis('loginCode', svgCaptcha.text, 5 * 60);
     res.type('image/svg+xml');
     res.send(svgCaptcha.data);
@@ -56,30 +56,43 @@ export class LoginController {
       if (username === '' || password.length < 6) {
         console.log('用户名或密码不合法');
       } else {
-        console.log(loginCode);
         let code = await this.toolsService.getRedis('loginCode');
-        if (loginCode === code) {
+        if (!code) {
+          return this.toolsService.error(null, '请重新获取验证码', res);
+        }
+        if (!loginCode) {
+          return this.toolsService.error(null, '请输入验证码', res);
+        }
+
+        if (loginCode.toUpperCase() !== code.toUpperCase()) {
           password = this.toolsService.getMd5(body.password);
           console.log(password);
           let userResult = await this.adminService.find({
             username: username,
             password: password,
           });
-          console.log(userResult);
+
+          if (!userResult.length) {
+            return this.toolsService.error(null, '', res);
+          }
+          console.log(123123123123123);
+          // 生成success_token
+          console.log(userResult[0].user_id);
+          const token = jwt.sign(
+            {
+              user_id: userResult[0].user_id,
+            },
+            'userLogin',
+          );
+          console.log('token===', token);
+          const data = { ...userResult, token: token };
+          return this.toolsService.success(data, '', res);
         } else {
-          console.log('验证码不正确');
-          return {
-            message: 222,
-          };
+          return this.toolsService.error(null, '验证码错误', res);
         }
       }
     } catch (error) {
-      res.send(2222222222222);
-      return {
-        status: 0,
-        message: 'xxx',
-        code: 200,
-      };
+      this.toolsService.error(null, error, res);
     }
   }
 }

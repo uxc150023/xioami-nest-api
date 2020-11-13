@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { RedisService } from 'nestjs-redis';
 
 // 引入验证码库
@@ -58,5 +58,28 @@ export class ToolsService {
     var data = await this.client.get(key);
     if (!data) return;
     return JSON.parse(data);
+  }
+
+  /**
+   * 封装接口响应 success
+   * @param data
+   * @param message
+   * @param res
+   */
+  async success(data: any, message: string, res: any) {
+    return res
+      .status(HttpStatus.OK)
+      .json({ data: data, status: 0, subMessage: message });
+  }
+  /**
+   * 封装接口响应 error
+   * @param data
+   * @param message
+   * @param res
+   */
+  async error(data: any, message: string, res: any) {
+    return res
+      .status(HttpStatus.OK)
+      .json({ data: data, status: 1, subMessage: message });
   }
 }
