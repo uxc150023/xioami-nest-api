@@ -36,7 +36,7 @@ export class ToolsService {
    * @param value
    * @param seconds
    */
-  async setRedis(key: string, value: any, seconds?: number) {
+  public async setRedis(key: string, value: any, seconds?: number) {
     value = JSON.stringify(value);
     if (!this.client) {
       await this.getClient();
@@ -51,7 +51,7 @@ export class ToolsService {
    * 获取redis值
    * @param key
    */
-  async getRedis(key: string) {
+  public async getRedis(key: string) {
     if (!this.client) {
       await this.getClient();
     }
@@ -60,6 +60,33 @@ export class ToolsService {
     return JSON.parse(data);
   }
 
+  /**
+   * @Description: 根据key删除redis缓存数据
+   * @param key {String}
+   * @return:
+   */
+  public async delRedis(key: string): Promise<any> {
+    if (!this.client) {
+      await this.getClient();
+    }
+    await this.client.del(key);
+  }
+
+  /**
+   * @Description: 清空redis的缓存
+   * @param {type}
+   * @return:
+   */
+  public async flushall(): Promise<any> {
+    if (!this.client) {
+      await this.getClient();
+    }
+    await this.client.flushall();
+  }
+
+  // -------------------------------封装redies---------------------------end
+
+  // -------------------------------封装req------------------------------begin
   /**
    * 封装接口响应 success
    * @param data
@@ -73,13 +100,14 @@ export class ToolsService {
   }
   /**
    * 封装接口响应 error
-   * @param data
+   * @param data 不为null 则跳转到登录页面2
    * @param message
    * @param res
    */
   async error(data: any, message: string, res: any) {
     return res
       .status(HttpStatus.OK)
-      .json({ data: data, status: 1, subMessage: message });
+      .json({ data: data, status: data ? 2 : 1, subMessage: message });
   }
+  // -------------------------------封装req------------------------------end
 }

@@ -6,7 +6,6 @@ import * as cookieParser from 'cookie-parser';
 import * as session from 'express-session';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { TransformInterceptor } from './interceptor/transform.interceptor';
-import * as expressJwt from 'express-jwt';
 
 // api文档插件
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -48,37 +47,6 @@ async function bootstrap() {
       rolling: true,
     }),
   );
-
-  // token校验
-  app.use(
-    expressJwt({
-      secret: 'userLogin', // 签名的密钥
-      algorithms: ['HS256'], // 设置算法（官方文档上没有写这个，但是不配置的话会报错）
-    }).unless({
-      path: ['/login', '/register/create', '/register/upload'], // 不经过 Token 解析的路径
-    }),
-  );
-
-  app.use((req, res, next) => {
-    // 由于express-jwt需要配合前台发送的cookie使用，所以要把Access-Control-Allow-Credentials设置为true
-    // 设置Access-Control-Allow-Credentials为true后，Access-Control-Allow-Origin不能使用通配符，所以我改成req.get("origin")
-    // 允许的请求主机名及端口号 也可以用通配符*， 表示允许所有主机请求
-    res.setHeader('Access-Control-Allow-Origin', req.get('origin'));
-    // 允许请求携带cookie
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    // 允许的请求方式
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, POST, OPTIONS, PUT, PATCH, DELETE',
-    );
-    // 允许的请求头 express-jwt的cookie是使用Authorization所以需要允许Authorization通过
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'X-Requested-With,content-type,Authorization',
-    );
-    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
-    next();
-  });
 
   // 注册过滤器
   app.useGlobalFilters(new HttpExceptionFilter());

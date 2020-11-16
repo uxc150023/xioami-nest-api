@@ -19,6 +19,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
+import { User } from 'src/domain/userLogin';
 
 @ApiTags('登录')
 @Controller('admin/login')
@@ -46,15 +47,15 @@ export class LoginController {
 
   @Post('doLogin')
   @ApiOperation({
-    summary: '登录doLogin',
+    summary: '登录',
   })
-  async doLogin(@Body() body, @Request() req, @Response() res) {
+  async doLogin(@Body() body: User, @Request() req, @Response() res) {
     try {
       let loginCode: string = body.loginCode;
-      let password: string = body.password;
-      let username: string = body.username;
+      let password: string = body.passWord;
+      let username: string = body.userName;
       if (username === '' || password.length < 6) {
-        console.log('用户名或密码不合法');
+        return this.toolsService.error(null, '用户名或密码不合法', res);
       } else {
         let code = await this.toolsService.getRedis('loginCode');
         if (!code) {
@@ -65,32 +66,49 @@ export class LoginController {
         }
 
         if (loginCode.toUpperCase() !== code.toUpperCase()) {
-          password = this.toolsService.getMd5(body.password);
-          console.log(password);
+          password = this.toolsService.getMd5(password);
           let userResult = await this.adminService.find({
-            username: username,
-            password: password,
+            username,
+            password,
           });
 
           if (!userResult.length) {
-            return this.toolsService.error(null, '', res);
+            return this.toolsService.error(null, '用户名或密码不存在', res);
           }
-          console.log(123123123123123);
           // 生成success_token
-          console.log(userResult[0].user_id);
           const token = jwt.sign(
             {
               user_id: userResult[0].user_id,
             },
             'userLogin',
           );
-          console.log('token===', token);
-          const data = { ...userResult, token: token };
+          const data = { ...userResult[0], accessToken: token };
+
+          // 将userId对应的session 存入redis
+          this.toolsService.setRedis(
+            'token_' + userResult[0].user_id,
+            token,
+            5 * 60,
+          );
           return this.toolsService.success(data, '', res);
         } else {
           return this.toolsService.error(null, '验证码错误', res);
         }
       }
+    } catch (error) {
+      this.toolsService.error(null, error, res);
+    }
+  }
+
+  @Post('logOut')
+  @ApiOperation({
+    summary: '退出登录',
+  })
+  async logOut(@Body() body, @Request() req, @Response() res) {
+    try {
+      // 删除redis中缓存的user_id token
+      this.toolsService.delRedis(`token_${body.userId}`);
+      this.toolsService.success(true, '', res);
     } catch (error) {
       this.toolsService.error(null, error, res);
     }
