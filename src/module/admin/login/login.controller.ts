@@ -20,9 +20,10 @@ import {
 } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
 import { User } from 'src/domain/userLogin';
+import { Config } from '../../../config/config';
 
 @ApiTags('登录')
-@Controller('admin/login')
+@Controller(`${Config.adminPath}'/login'`)
 export class LoginController {
   constructor(
     private toolsService: ToolsService,
@@ -58,6 +59,7 @@ export class LoginController {
         return this.toolsService.error(null, '用户名或密码不合法', res);
       } else {
         let code = await this.toolsService.getRedis('loginCode');
+
         if (!code) {
           return this.toolsService.error(null, '请重新获取验证码', res);
         }
@@ -79,6 +81,7 @@ export class LoginController {
           const token = jwt.sign(
             {
               user_id: userResult[0].user_id,
+              // userinfo: userResult[0],
             },
             'userLogin',
           );
