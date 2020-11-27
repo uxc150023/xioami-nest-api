@@ -7,12 +7,11 @@ import * as jwt from 'jsonwebtoken';
 export class AdminauthMiddleware implements NestMiddleware {
   constructor(private toolsService: ToolsService) {}
   async use(req: any, res: any, next: () => void) {
-    // 1. 获取session 中保存的用户信息
     let pathname = url.parse(req.baseUrl).pathname; // 获取访问地址
     // 查看是否有token
-    console.log(req.headers['access-token']);
+    console.log('access-token===', req.headers['access-token']);
     if (req.headers['access-token']) {
-      //设置全局变量
+      // 解析token 获取userid
       jwt.verify(req.headers['access-token'], 'userLogin', function(
         err,
         decode,
@@ -21,12 +20,14 @@ export class AdminauthMiddleware implements NestMiddleware {
           //  时间失效的时候/ 伪造的token
           // res.send({ status: 0 });
         } else {
+          //设置全局变量
           res.locals.userid = decode.user_id;
         }
       });
+      console.log('userId===', res.locals.userid);
       // redis中获取token 判断是否过期
       const token = await this.toolsService.getRedis(
-        `token_${req.headers['access-token']}`,
+        `token_${res.locals.userid}`,
       );
       console.log('==============', token);
       if (!token) {
@@ -35,7 +36,6 @@ export class AdminauthMiddleware implements NestMiddleware {
       next();
     } else {
       console.log('pathname===', pathname);
-
       if (
         pathname == '/admin/login' ||
         pathname == '/admin/login/code' ||

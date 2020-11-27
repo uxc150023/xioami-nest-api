@@ -23,7 +23,7 @@ import { User } from 'src/domain/userLogin';
 import { Config } from '../../../config/config';
 
 @ApiTags('登录')
-@Controller(`${Config.adminPath}'/login'`)
+@Controller(`${Config.adminPath}/login`)
 export class LoginController {
   constructor(
     private toolsService: ToolsService,
@@ -69,6 +69,7 @@ export class LoginController {
 
         if (loginCode.toUpperCase() !== code.toUpperCase()) {
           password = this.toolsService.getMd5(password);
+          console.log(password);
           let userResult = await this.adminService.find({
             username,
             password,
@@ -91,7 +92,7 @@ export class LoginController {
           this.toolsService.setRedis(
             'token_' + userResult[0].user_id,
             token,
-            5 * 60,
+            5 * 60 * 10,
           );
           return this.toolsService.success(data, '', res);
         } else {
