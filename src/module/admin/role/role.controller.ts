@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Request, Response } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, Response } from '@nestjs/common';
 import { RoleService } from '../../../service/role/role.service';
 import { Config } from '../../../config/config';
 import { ToolsService } from '../../../service/tools/tools.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Role } from 'src/domain/roleInfo';
 
-@ApiTags('角色')
+@ApiTags('获取角色列表')
 @Controller(`${Config.adminPath}/role`)
 export class RoleController {
   constructor(
@@ -12,19 +13,27 @@ export class RoleController {
     private toolsService: ToolsService,
   ) {}
 
-  @Get()
+  @Post()
   @ApiOperation({
     summary: '获取角色',
   })
-  async index(@Body() body, @Request() req, @Response() res) {
-    const data = await this.roleService.find({}, { pageSize: 10, current: 1 });
-
-    console.log('====================================');
-    console.log(data);
-    console.log('====================================');
-    // data.pageData.forEach((element: any) => {
-    //   element.add_time = element.add_time.getTime();
-    // });
+  async getRole(@Body() body, @Request() req, @Response() res) {
+    const data = await this.roleService.find({}, body);
+    data.pageData.forEach((element: any) => {
+      element.add_time = element.add_time.getTime();
+    });
     this.toolsService.success(data, '', res);
+  }
+
+  @Post()
+  @ApiOperation({
+    summary: '新增角色',
+  })
+  async addRole(@Body() body: Role, @Request() req, @Response() res) {
+    console.log('====================================');
+    console.log(body);
+    console.log('====================================');
+    // const data = await this.roleService.find({}, body);
+    this.toolsService.success({}, '', res);
   }
 }

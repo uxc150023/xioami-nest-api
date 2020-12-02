@@ -12,22 +12,34 @@ export class RoleService {
     private roleRepository: Repository<Role>,
   ) {}
 
+  /**
+   * 获取角色
+   * @param json
+   * @param pageParam
+   */
   async find(json: any, pageParam: any) {
     try {
-      let qb = this.roleRepository.createQueryBuilder(); // 创建queryBuilder
-      qb = qb
-        .skip(pageParam.pageSize * (pageParam.current - 1))
-        .where(json as Partial<Role>)
-        .take(pageParam.pageSize);
-      let res = await qb.getManyAndCount();
-      return {
-        pageData: res[0],
-        pageSize: pageParam.pageSize,
-        // pages: res[1] % pageParam.pageSize === 0 ? res[1] % pageParam.pageSize :
-      };
-      // return await this.roleRepository.find(json);
+      const total = await this.roleRepository.query(
+        'SELECT count(*) as total  FROM `role` LIMIT 0,10',
+      );
+      const data = await this.roleRepository.query(
+        'SELECT count(*) as total  FROM `role` LIMIT 0,10',
+      );
+      // let qb = this.roleRepository.createQueryBuilder(); // 创建queryBuilder
+      // qb = qb
+      //   .skip(pageParam.pageSize * (pageParam.pages - 1))
+      //   .where(json as Partial<Role>)
+      //   .take(pageParam.pageSize);
+      // let res = await qb.getManyAndCount();
+      // return {
+      //   pageData: res[0],
+      //   pageSize: pageParam.pageSize,
+      //   pages: Math.ceil(res[1] / pageParam.pageSize),
+      //   totalSize: Math.ceil(res[1]),
+      // };
     } catch (error) {
-      return [];
+      console.log('error:', error);
+      return error;
     }
   }
 
