@@ -19,51 +19,67 @@ export class RoleService {
    */
   async find(json: any, pageParam: any) {
     try {
-      const total = await this.roleRepository.query(
-        'SELECT count(*) as total  FROM `role` LIMIT 0,10',
-      );
-      const data = await this.roleRepository.query(
-        'SELECT count(*) as total  FROM `role` LIMIT 0,10',
-      );
-      // let qb = this.roleRepository.createQueryBuilder(); // 创建queryBuilder
-      // qb = qb
-      //   .skip(pageParam.pageSize * (pageParam.pages - 1))
-      //   .where(json as Partial<Role>)
-      //   .take(pageParam.pageSize);
-      // let res = await qb.getManyAndCount();
-      // return {
-      //   pageData: res[0],
-      //   pageSize: pageParam.pageSize,
-      //   pages: Math.ceil(res[1] / pageParam.pageSize),
-      //   totalSize: Math.ceil(res[1]),
-      // };
+      let sqlTotal = 'SELECT count(*) as total FROM `role` ';
+      const total = await this.roleRepository.query(sqlTotal);
+      let sql = `SELECT * FROM role order by add_time DESC LIMIT ${pageParam.pageSize *
+        (pageParam.pages - 1)},${pageParam.pageSize}`;
+      const data = await this.roleRepository.query(sql);
+      return {
+        pageData: data,
+        pageSize: pageParam.pageSize,
+        pages: Math.ceil(+total[0].total / pageParam.pageSize),
+        totalSize: +total[0].total,
+      };
     } catch (error) {
-      console.log('error:', error);
       return error;
     }
   }
 
-  async add(json: any) {
+  /**
+   * 新增角色
+   * @param json
+   */
+  async add(params: any = {}) {
     try {
-      return await this.roleRepository.save(json);
+      const data = await this.roleRepository.query(
+        'INSERT INTO role SET ?',
+        params,
+      );
+      return data;
     } catch (error) {
-      return [];
+      return error;
     }
   }
 
-  async update(json1: any, json2: any) {
+  /**
+   * 编辑保存角色信息
+   * @param params
+   */
+  async update(params: any) {
     try {
-      return await this.roleRepository.update(json1, json2);
+      const sql = [
+        `role`,
+        `SET status='${params.status}',`,
+        `title='${params.title}',`,
+        `description='${params.description}'`,
+        `WHERE _id=${params._id}`,
+      ].join(' ');
+      return await this.roleRepository.query(`update ${sql}`);
     } catch (error) {
-      return [];
+      return error;
     }
   }
 
-  async delete(json: any) {
+  /**
+   * 删除角色
+   * @param params
+   */
+  async delete(id: string) {
     try {
-      return await this.roleRepository.delete(json);
+      const sql = ['role', `FROM role`, `WHERE _id=${id}`].join(' ');
+      return await this.roleRepository.query(`delete ${sql}`);
     } catch (error) {
-      return [];
+      return error;
     }
   }
 }

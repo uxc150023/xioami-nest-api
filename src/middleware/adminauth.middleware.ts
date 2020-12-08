@@ -29,7 +29,6 @@ export class AdminauthMiddleware implements NestMiddleware {
       const token = await this.toolsService.getRedis(
         `token_${res.locals.userid}`,
       );
-      console.log('==============', token);
       if (!token) {
         return this.toolsService.error(true, '登录token已过期', res);
       }
