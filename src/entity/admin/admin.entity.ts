@@ -2,7 +2,7 @@ import { PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
 @Entity()
 export class Admin {
   @PrimaryGeneratedColumn()
-  user_id: number;
+  _id: number;
 
   @Column({ length: 255 })
   username: string;
@@ -18,6 +18,9 @@ export class Admin {
 
   @Column({ default: () => 1 })
   status: number;
+
+  @Column({ default: () => 1 })
+  role_id: number;
 
   @Column()
   is_super: number;

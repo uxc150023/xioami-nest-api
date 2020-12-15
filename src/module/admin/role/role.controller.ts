@@ -50,7 +50,11 @@ export class RoleController {
   })
   async update(@Body() body: Role, @Request() req, @Response() res) {
     const data = await this.roleService.update(body);
-    this.toolsService.success(data, '', res);
+    if (!data.errorNo) {
+      this.toolsService.success(data, '', res);
+    } else {
+      this.toolsService.error(null, data, res);
+    }
   }
 
   @Delete(':id')
@@ -59,7 +63,7 @@ export class RoleController {
   })
   async delete(@Param('id') id: string, @Request() req, @Response() res) {
     const data = await this.roleService.delete(id);
-    if (!data.console.errorNo) {
+    if (!data.errorNo) {
       this.toolsService.success(data, '', res);
     } else {
       this.toolsService.error(null, data, res);

@@ -10,10 +10,16 @@ import { Role } from '../../entity/admin/role.entity';
 import { RedisModule } from 'nestjs-redis';
 import { RoleService } from '../../service/role/role.service';
 import { RoleController } from './role/role.controller';
+import { Tools } from '../../utils/tools';
 
 @Module({
-  controllers: [MainController, LoginController, ManagerController, RoleController],
-  providers: [ToolsService, AdminService, RoleService],
+  controllers: [
+    MainController,
+    LoginController,
+    ManagerController,
+    RoleController,
+  ],
+  providers: [ToolsService, AdminService, RoleService, Tools],
   imports: [
     TypeOrmModule.forFeature([Admin, Role]),
     RedisModule.register({

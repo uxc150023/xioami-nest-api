@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '../../entity/admin/role.entity';
 import { RoleInterface } from '../../interface/role.interface';
+import { Tools } from '../../utils/tools';
 
 @Injectable()
 export class RoleService {
@@ -10,6 +11,7 @@ export class RoleService {
     @InjectRepository(Role)
     @Inject('RoleService')
     private roleRepository: Repository<Role>,
+    private tools: Tools,
   ) {}
 
   /**
@@ -61,7 +63,11 @@ export class RoleService {
         `role`,
         `SET status='${params.status}',`,
         `title='${params.title}',`,
-        `description='${params.description}'`,
+        `description='${params.description}',`,
+        `update_time='${this.tools.formatDate(
+          new Date(),
+          'yyyy-MM-dd hh:mm:ss',
+        )}'`,
         `WHERE _id=${params._id}`,
       ].join(' ');
       return await this.roleRepository.query(`update ${sql}`);

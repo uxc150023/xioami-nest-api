@@ -14,5 +14,8 @@ export class Role {
   status: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  update_time: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   add_time: Date;
 }
